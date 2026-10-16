@@ -1,0 +1,15 @@
+package org.example.socialmediabackend.controller;
+import org.example.socialmediabackend.model.*;import org.example.socialmediabackend.repository.*;import org.example.socialmediabackend.service.ApiMapper;import org.springframework.http.*;import org.springframework.security.core.Authentication;import org.springframework.web.bind.annotation.*;import java.util.*;
+@RestController @RequestMapping("/users") public class UserController {
+ private final UserRepository users;private final PostRepository posts;private final FollowRepository follows;
+ public UserController(UserRepository u,PostRepository p,FollowRepository f){users=u;posts=p;follows=f;}
+ @GetMapping("/{id}") public Map<String,Object> byId(@PathVariable Long id){return ApiMapper.user(findUser(id));}
+ @GetMapping("/email/{email}") public Map<String,Object> byEmail(@PathVariable String email){return ApiMapper.user(users.findByEmailIgnoreCase(email).orElseThrow(()->new org.example.socialmediabackend.exception.ResourceNotFoundException("User not found")));}
+ @GetMapping("/search") public List<Map<String,Object>> search(@RequestParam(defaultValue="") String username){String q=username.trim();if(q.isBlank())return List.of();return users.findTop10ByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCase(q,q).stream().map(ApiMapper::user).toList();}
+ @GetMapping("/{id}/posts") public List<Map<String,Object>> userPosts(@PathVariable Long id){findUser(id);return posts.findByUserIdOrderByCreatedAtDesc(id).stream().map(ApiMapper::post).toList();}
+ @GetMapping("/{id}/followers/count") public long followers(@PathVariable Long id){findUser(id);return follows.countByFollowingId(id);}
+ @GetMapping("/{id}/following/count") public long following(@PathVariable Long id){findUser(id);return follows.countByFollowerId(id);}
+ @GetMapping("/{id}/timeline") public List<Map<String,Object>> timeline(@PathVariable Long id){findUser(id);Set<Long> ids=new HashSet<>();ids.add(id);follows.findByFollowerId(id).forEach(f->ids.add(f.getFollowing().getId()));return posts.findAllByOrderByCreatedAtDesc().stream().filter(p->ids.contains(p.getUser().getId())).map(ApiMapper::post).toList();}
+ @PutMapping("/{id}") public ResponseEntity<?> update(@PathVariable Long id,@RequestBody Map<String,String> b,Authentication auth){User u=findUser(id),actor=users.findByEmailIgnoreCase(auth.getName()).orElseThrow();if(!u.getId().equals(actor.getId()))return ResponseEntity.status(403).body(Map.of("message","You can only update your own profile"));if(b.containsKey("fullName"))u.setFullName(b.get("fullName").trim());if(b.containsKey("username")&&!b.get("username").equalsIgnoreCase(u.getUsername())){if(users.existsByUsernameIgnoreCase(b.get("username")))return ResponseEntity.status(409).body(Map.of("message","Username is already taken"));u.setUsername(b.get("username").trim());}if(b.containsKey("bio"))u.setBio(b.get("bio").trim());return ResponseEntity.ok(ApiMapper.user(users.save(u)));}
+ private User findUser(Long id){return users.findById(id).orElseThrow(()->new org.example.socialmediabackend.exception.ResourceNotFoundException("User not found: "+id));}
+}

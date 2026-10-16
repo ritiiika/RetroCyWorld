@@ -1,0 +1,13 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { searchUsers, followUser, getUserByEmail, getTokenPayload } from "../services/postService";
+import { FaArrowRight } from "react-icons/fa";
+import "../App.css";
+function RightPanel(){
+ const navigate=useNavigate(); const [suggestions,setSuggestions]=useState([]); const [followed,setFollowed]=useState({}); const [currentUserId,setCurrentUserId]=useState(null); const [loading,setLoading]=useState(true);
+ useEffect(()=>{let active=true;const load=async()=>{try{const payload=getTokenPayload();const userResponse=payload?.sub?await getUserByEmail(payload.sub):null;const ownId=userResponse?.data?.id??null;if(active)setCurrentUserId(ownId);const response=await searchUsers("a");const users=Array.isArray(response.data)?response.data:[];if(active)setSuggestions(users.filter(u=>String(u.id)!==String(ownId)).slice(0,5));}catch{if(active)setSuggestions([])}finally{if(active)setLoading(false)}};load();return()=>{active=false}},[]);
+ const handleFollow=async user=>{if(!currentUserId||!user.id||followed[user.id])return;try{await followUser(currentUserId,user.id);setFollowed(prev=>({...prev,[user.id]:true}))}catch(error){console.error("Follow failed:",error)}};
+ return <aside className="right-panel"><section className="side-widget"><div className="right-panel-title">{"// Find your people"}</div>{loading?<div className="side-empty">Scanning the grid…</div>:suggestions.length?suggestions.map(user=><div key={user.id} className="suggestion-item"><button className="suggestion-profile" onClick={()=>navigate(`/profile/${user.id}`)}><span className="mini-avatar">{(user.username||"??").slice(0,2).toUpperCase()}</span><span className="suggestion-name"><strong>@{user.username}</strong><small>{user.fullName||"Grid member"}</small></span></button><button className={`follow-btn ${followed[user.id]?"following":""}`} onClick={()=>handleFollow(user)} disabled={!currentUserId||followed[user.id]}>{followed[user.id]?"Following":"Follow"}</button></div>):<div className="side-empty">No new people found yet. Try Explore to search the whole grid.</div>}<button className="side-explore-link" onClick={()=>navigate("/explore")}>Explore everyone <FaArrowRight/></button></section>
+ <section className="side-note-card"><span className="side-note-star">✦</span><div className="side-note-title">A LITTLE REMINDER</div><p>Your timeline belongs to you. Follow the people you care about and use Friends First for a chronological feed.</p><button onClick={()=>navigate("/feed")}>Back to your feed</button></section></aside>;
+}
+export default RightPanel;
