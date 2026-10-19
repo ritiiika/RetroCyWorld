@@ -1,58 +1,306 @@
-# RetroSocial — Full-Stack Social Media Platform
+# RetroCyWorld ✦
 
-React frontend + Spring Boot REST API + JPA, JWT authentication, and H2 for quick local development (PostgreSQL is supported through a profile).
+A retro-inspired social media platform built with React and Spring Boot, featuring a neon digital-universe aesthetic. Create posts, interact with other users, follow people, and explore a community through a distinctive retro interface.
 
-## Start the backend
+**Live Website:** https://retro-cy-world.vercel.app  
+**Backend API:** https://retrocyworld.onrender.com  
+**Database:** PostgreSQL on Supabase
 
-1. Install JDK 21.
-2. Open `backend/social-media-backend` in IntelliJ by opening its `pom.xml` as a Maven project.
-3. Wait for Maven import and set Project SDK to JDK 21.
-4. In PowerShell, from `backend/social-media-backend`, run:
+## Features
 
-   ```powershell
-   .\mvnw.cmd spring-boot:run
-   ```
+- User registration and login
+- JWT-based authentication
+- Create and view posts
+- Like, comment on, save, and share posts
+- User profiles and profile updates
+- Search for users
+- Follow and unfollow users
+- View user posts, followers, and following
+- Personalized user timelines
+- Persistent PostgreSQL storage
+- Retro-inspired user interface
 
-The API listens on `http://localhost:8080`. Local default uses in-memory H2, so data is cleared when the backend stops.
+## Tech Stack
 
-## Start the frontend
+**Frontend**
+- React.js
+- JavaScript
+- Axios
+- CSS
 
-1. Install Node.js 20 or 22.
-2. Open another terminal in `social-media-frontend`.
-3. Run:
+**Backend**
+- Java 21
+- Spring Boot 3.5.x
+- Spring Web
+- Spring Data JPA and Hibernate
+- Spring Security
+- JWT authentication
+- Maven
 
-   ```powershell
-   npm ci
-   npm start
-   ```
+**Database and Deployment**
+- PostgreSQL — Supabase
+- H2 — local development
+- Docker
+- Render — backend hosting
+- Vercel — frontend hosting
 
-4. Visit `http://localhost:3000`.
+## Architecture
 
-The frontend API base URL defaults to `http://localhost:8080`. Set `REACT_APP_API_URL` before building if the API runs elsewhere.
+```text
+             User / Browser
+                    |
+                    v
+          React Frontend (Vercel)
+                    |
+              HTTPS / REST API
+                    |
+                    v
+        Spring Boot Backend (Render)
+                    |
+               JDBC / JPA
+                    |
+                    v
+          PostgreSQL (Supabase)
+```
 
-## Use PostgreSQL
+## Project Structure
 
-Create a database named `social_media_db`, set `SPRING_PROFILES_ACTIVE=postgres`, and set `DB_USERNAME` / `DB_PASSWORD`. The default URL is `jdbc:postgresql://localhost:5432/social_media_db`; `DATABASE_URL` can override it but must be a JDBC URL. Set a long random `JWT_SECRET` outside local development.
+```text
+RetroCyWorld-enhanced/
+├── backend/
+│   └── social-media-backend/
+│       ├── src/
+│       ├── pom.xml
+│       └── Dockerfile
+│
+└── social-media-frontend/
+    ├── public/
+    ├── src/
+    │   └── services/
+    │       └── postService.js
+    ├── package.json
+    └── .env
+```
 
-## Implemented API routes
+## Getting Started
 
-- `POST /auth/register`, `POST /auth/login`
-- `GET /posts`, `GET /posts/{id}`, `GET /posts/user/{userId}`, `POST /posts`, `POST /posts/{id}/like`, `POST /posts/{id}/share`, `DELETE /posts/{id}`
-- `GET /users/{id}`, `GET /users/email/{email}`, `GET /users/search?username=...`, `GET /users/{id}/posts`, `GET /users/{id}/followers/count`, `GET /users/{id}/following/count`, `GET /users/{id}/timeline`, `PUT /users/{id}`
-- `GET /comments/post/{postId}`, `POST /comments`, `DELETE /comments/{id}`
-- `POST /follow`
+### Prerequisites
 
-All routes except registration and login require a valid Bearer token. Passwords are stored as BCrypt hashes, not plain text.
+Install the following before running the project locally:
 
-## Frontend features
+- Git
+- Java 21 JDK
+- Node.js and npm
+- Maven, or the included Maven wrapper if available
 
-- Responsive Y2K / lo-fi anime themed navigation and user search.
-- Main feed with **Everyone** and **Friends First** (self + followed accounts, newest first) modes.
-- Create posts with text and optional image URL preview.
-- Like/unlike posts through the backend, open and submit comments, share a post link, and delete your own posts.
-- Explore users and search loaded posts; open user profiles from search and post headers.
-- Edit your own display name, username, and bio through `PUT /users/{id}`.
-- Save and unsave posts in a browser-local collection. This feature currently uses `localStorage`, so saved items are local to that browser/device and are not synced to a database or other devices.
-- A small activity panel is present in the UI, but a persistent notifications API and direct messaging are not implemented yet.
+### 1. Clone the repository
 
-The backend API and authentication flow were kept compatible with the existing frontend service layer. The frontend production build and test suite were run after these UI additions; the backend source was not changed for this feature pass.
+```bash
+git clone https://github.com/ritiiika/RetroCyWorld.git
+cd RetroCyWorld
+```
+
+If your repository URL differs, use the clone URL displayed on your GitHub repository page.
+
+### 2. Start the backend
+
+Open a terminal in the backend directory:
+
+```bash
+cd backend/social-media-backend
+```
+
+On Windows PowerShell, run:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+On macOS or Linux, run:
+
+```bash
+./mvnw spring-boot:run
+```
+
+Alternatively, if Maven is installed:
+
+```bash
+mvn spring-boot:run
+```
+
+The default local configuration is intended to use an in-memory H2 database. The backend normally runs at:
+
+`http://localhost:8080`
+
+Note: Data stored in an in-memory database is not persistent after the backend stops.
+
+### 3. Start the frontend
+
+Open a second terminal:
+
+```bash
+cd social-media-frontend
+npm install
+npm start
+```
+
+Open the application in your browser:
+
+`http://localhost:3000`
+
+## Environment Variables
+
+### Frontend Configuration
+
+For local development, create a `.env` file inside `social-media-frontend`:
+
+```env
+REACT_APP_API_URL=http://localhost:8080
+```
+
+For the deployed Vercel frontend, configure:
+
+```env
+REACT_APP_API_URL=https://retrocyworld.onrender.com
+```
+
+Restart the local development server after changing `.env`. For Vercel, trigger a new deployment so the updated variable is included in the frontend build.
+
+### Backend Configuration
+
+Set the following variables in your hosting provider's environment settings. Never commit real passwords or secrets.
+
+| Variable | Description |
+|---|---|
+| `PORT` | HTTP port supplied by the hosting platform |
+| `SPRING_PROFILES_ACTIVE` | Set to `postgres` for PostgreSQL deployment |
+| `DATABASE_URL` | JDBC URL for PostgreSQL |
+| `DB_USERNAME` | Database username |
+| `DB_PASSWORD` | Database password |
+| `DB_DRIVER` | PostgreSQL driver: `org.postgresql.Driver` |
+| `JWT_SECRET` | Strong, unique JWT signing secret |
+| `JWT_EXPIRATION_SECONDS` | JWT lifetime in seconds; defaults to `86400` |
+| `CORS_ALLOWED_ORIGINS` | Permitted frontend origins |
+
+Example PostgreSQL URL format:
+
+```text
+jdbc:postgresql://<pooler-host>:5432/postgres?sslmode=require
+```
+
+Replace `<pooler-host>` with the actual Supabase Session Pooler hostname. Use the exact username and connection details shown in Supabase's **Connect** dialog.
+
+Do not include actual database passwords or JWT secrets in this README.
+
+## API Overview
+
+The frontend API service uses the following backend endpoint paths:
+
+| Feature | Method | Endpoint |
+|---|---|---|
+| Register | POST | `/auth/register` |
+| Login | POST | `/auth/login` |
+| List posts | GET | `/posts` |
+| Get post | GET | `/posts/{id}` |
+| Posts by user | GET | `/posts/user/{userId}` |
+| Create post | POST | `/posts` |
+| Like post | POST | `/posts/{postId}/like` |
+| Share post | POST | `/posts/{postId}/share` |
+| Delete post | DELETE | `/posts/{id}` |
+| Get user | GET | `/users/{id}` |
+| Find user by email | GET | `/users/email/{email}` |
+| User posts | GET | `/users/{id}/posts` |
+| Followers count | GET | `/users/{id}/followers/count` |
+| Following count | GET | `/users/{id}/following/count` |
+| User timeline | GET | `/users/{id}/timeline` |
+| Search users | GET | `/users/search?username={username}` |
+| Update user | PUT | `/users/{id}` |
+| Comments for post | GET | `/comments/post/{postId}` |
+| Add comment | POST | `/comments` |
+| Delete comment | DELETE | `/comments/{id}` |
+| Follow user | POST | `/follow` |
+
+Some endpoints may require a valid JWT. Refer to the backend security configuration for the actual authorization rules.
+
+## Deployment
+
+### Backend — Render
+
+1. Connect the GitHub repository to a Render Web Service.
+2. Set the root directory to `backend/social-media-backend`.
+3. Use Docker if deploying with the project's Dockerfile.
+4. Configure the PostgreSQL profile and required environment variables.
+5. Deploy and inspect the application logs.
+6. Confirm Spring Boot starts and establishes a database connection.
+
+### Database — Supabase
+
+1. Create a PostgreSQL project.
+2. Open **Connect** and select the appropriate connection method, such as Session Pooler.
+3. Copy the database host, port, database name, and username.
+4. Configure the JDBC URL and credentials in Render.
+5. Keep SSL enabled and never expose the database password.
+
+### Frontend — Vercel
+
+1. Import the GitHub repository into Vercel.
+2. Set the root directory to `social-media-frontend`.
+3. Configure the build command as `npm run build`.
+4. Set the output directory to `build`.
+5. Add `REACT_APP_API_URL=https://retrocyworld.onrender.com`.
+6. Deploy the frontend.
+7. Verify that backend CORS configuration allows the deployed frontend origin.
+
+## Troubleshooting
+
+### Registration or login fails with a CORS error
+
+- Verify that `CORS_ALLOWED_ORIGINS` includes the exact frontend origin.
+- For the current deployment, the origin is `https://retro-cy-world.vercel.app`.
+- Ensure Spring Security enables CORS and applies the allowed origins to API and preflight requests.
+- Redeploy the backend after configuration changes.
+
+### Requests still use localhost
+
+- Check the Vercel environment variable `REACT_APP_API_URL`.
+- Confirm the frontend API service reads the variable correctly.
+- Redeploy the frontend after changing environment variables.
+
+### Database connection fails
+
+- Ensure the JDBC URL starts with `jdbc:postgresql://`.
+- Verify the hostname, port, username, and password.
+- Keep `sslmode=require` in the connection URL.
+- Check Render logs for connection or authentication errors.
+
+### API returns 401 or 403
+
+The request may require a valid JWT or may be blocked by the security configuration. Check the request headers and backend security rules rather than disabling authentication globally.
+
+### First request is slow
+
+Render free instances may spin down after inactivity, which can delay the first request. Check the service logs before assuming the backend is unavailable.
+
+## Security Notes
+
+- Never commit database credentials, JWT secrets, API keys, or secret-bearing `.env` files.
+- Use a strong, unique JWT signing secret in production.
+- Rotate any credentials that have been exposed in logs, screenshots, commits, or messages.
+- Restrict CORS to trusted frontend origins.
+- Enforce authentication and authorization on the backend.
+
+## Contributing
+
+1. Fork the repository or create a feature branch.
+2. Make your changes.
+3. Test the frontend and backend.
+4. Commit with a descriptive message.
+5. Open a pull request describing the changes and tests.
+
+## License
+
+No license has been specified yet. Add a `LICENSE` file before granting others permission to reuse or redistribute this project.
+
+---
+
+**Built with Java, React, PostgreSQL, and retro-futuristic energy.**
